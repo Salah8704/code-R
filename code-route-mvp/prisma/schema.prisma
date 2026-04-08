@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  passwordHash      String
+  role              String              @default("student")
+  soundEnabled      Boolean             @default(true)
+  browserNotify     Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  subscriptions     Subscription[]
+  attempts          Attempt[]
+  series            Series[]
+  weaknessScores    WeaknessScore[]
+  recommendations   Recommendation[]
+  readiness         ReadinessSnapshot[]
+  studyBlocks       StudyBlock[]
+  blockPauses       BlockPause[]
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  userId               String
+  stripeCustomerId     String
+  stripeSubscriptionId String?
+  status               String
+  currentPeriodEnd     DateTime?
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id                String   @id
+  theme             String
+  subtheme          String
+  trapFamily        String
+  difficulty        Int
+  type              String   @default("qcm")
+  prompt            String
+  explanationShort  String
+  explanationLong   String?
+  hasImage          Boolean  @default(false)
+  imageUrl          String?
+  examLike          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  choices           Choice[]
+  attempts          Attempt[]
+  seriesItems       SeriesItem[]
+  @@index([theme])
+  @@index([subtheme])
+  @@index([trapFamily])
+}
+
+model Choice {
+  id         String   @id
+  questionId String
+  position   Int
+  text       String
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@index([questionId])
+}
+
+model Attempt {
+  id              String   @id @default(uuid())
+  userId          String
+  questionId      String
+  chosenChoiceIds Json
+  isCorrect       Boolean
+  responseTimeMs  Int
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+}
+
+model Series {
+  id           String      @id @default(uuid())
+  userId       String
+  mode         String
+  plannedCount Int
+  startedAt    DateTime    @default(now())
+  endedAt      DateTime?
+  studyBlockId String?
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        SeriesItem[]
+  studyBlock   StudyBlock? @relation(fields: [studyBlockId], references: [id], onDelete: SetNull)
+}
+
+model SeriesItem {
+  id         String   @id @default(uuid())
+  seriesId   String
+  questionId String
+  position   Int
+  series     Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@unique([seriesId, position])
+}
+
+model WeaknessScore {
+  userId    String
+  key       String
+  score     Float    @default(0)
+  updatedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId, key])
+}
+
+model Recommendation {
+  id          String   @id @default(uuid())
+  userId      String
+  generatedAt DateTime @default(now())
+  targetTags  Json
+  seriesId    String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ReadinessSnapshot {
+  id         String   @id @default(uuid())
+  userId     String
+  score      Float
+  level      String
+  signals    Json
+  computedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudyBlock {
+  id              String     @id @default(uuid())
+  userId          String
+  blockNumber     Int
+  startedAt       DateTime   @default(now())
+  endedAt         DateTime?
+  seriesCompleted Int        @default(0)
+  averageScore    Float?
+  status          String     @default("active")
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series          Series[]
+  pauses          BlockPause[]
+}
+
+model BlockPause {
+  id           String     @id @default(uuid())
+  userId       String
+  studyBlockId String
+  startAt      DateTime
+  endAt        DateTime
+  status       String
+  respected    Boolean    @default(false)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studyBlock   StudyBlock @relation(fields: [studyBlockId], references: [id], onDelete: Cascade)
+}

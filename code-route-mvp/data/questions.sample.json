@@ -1,0 +1,60 @@
+{
+  "questions": [
+    {
+      "id": "q_001",
+      "theme": "priorites",
+      "subtheme": "priorite_a_droite",
+      "trap_family": "priorite_implicite",
+      "difficulty": 1,
+      "type": "qcm",
+      "prompt": "J'arrive à une intersection sans panneau ni feu. Une voiture arrive à ma droite. Que dois-je faire ?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Je passe en premier",
+          "is_correct": false
+        },
+        {
+          "id": "b",
+          "text": "Je ralentis et je lui cède le passage",
+          "is_correct": true
+        },
+        {
+          "id": "c",
+          "text": "Je klaxonne et je passe",
+          "is_correct": false
+        }
+      ],
+      "explanation_short": "Sans signalisation, la priorité à droite s'applique.",
+      "has_image": false
+    },
+    {
+      "id": "q_002",
+      "theme": "priorites",
+      "subtheme": "sortie_parking",
+      "trap_family": "sortie_voie_non_publique",
+      "difficulty": 1,
+      "type": "qcm",
+      "prompt": "Je sors d'un parking pour entrer sur la route. Une voiture circule déjà sur cette route. Qui est prioritaire ?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Moi",
+          "is_correct": false
+        },
+        {
+          "id": "b",
+          "text": "La voiture déjà sur la route",
+          "is_correct": true
+        },
+        {
+          "id": "c",
+          "text": "Nous passons ensemble",
+          "is_correct": false
+        }
+      ],
+      "explanation_short": "En sortant d'un parking, je dois céder le passage.",
+      "has_image": false
+    }
+  ]
+}
