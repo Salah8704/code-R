@@ -23,35 +23,38 @@ model User {
   readiness         ReadinessSnapshot[]
   studyBlocks       StudyBlock[]
   blockPauses       BlockPause[]
+  examResults       ExamResult[]
 }
 
 model Subscription {
-  id                   String   @id @default(uuid())
+  id                   String    @id @default(uuid())
   userId               String
   stripeCustomerId     String
   stripeSubscriptionId String?
+  stripePriceId        String?
   status               String
   currentPeriodEnd     DateTime?
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Question {
-  id                String   @id
-  theme             String
-  subtheme          String
-  trapFamily        String
-  difficulty        Int
-  type              String   @default("qcm")
-  prompt            String
-  explanationShort  String
-  explanationLong   String?
-  hasImage          Boolean  @default(false)
-  imageUrl          String?
-  examLike          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  choices           Choice[]
-  attempts          Attempt[]
-  seriesItems       SeriesItem[]
+  id               String       @id
+  theme            String
+  subtheme         String
+  trapFamily       String
+  difficulty       Int
+  type             String       @default("qcm")
+  prompt           String
+  explanationShort String
+  explanationLong  String?
+  hasImage         Boolean      @default(false)
+  imageUrl         String?
+  examLike         Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  choices          Choice[]
+  attempts         Attempt[]
+  seriesItems      SeriesItem[]
+  examItems        ExamItem[]
   @@index([theme])
   @@index([subtheme])
   @@index([trapFamily])
@@ -74,10 +77,12 @@ model Attempt {
   chosenChoiceIds Json
   isCorrect       Boolean
   responseTimeMs  Int
+  seriesId        String?
   createdAt       DateTime @default(now())
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   @@index([userId, createdAt])
+  @@index([userId, questionId])
 }
 
 model Series {
@@ -88,6 +93,7 @@ model Series {
   startedAt    DateTime    @default(now())
   endedAt      DateTime?
   studyBlockId String?
+  score        Int?
   user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items        SeriesItem[]
   studyBlock   StudyBlock? @relation(fields: [studyBlockId], references: [id], onDelete: SetNull)
@@ -103,9 +109,32 @@ model SeriesItem {
   @@unique([seriesId, position])
 }
 
+model ExamResult {
+  id          String     @id @default(uuid())
+  userId      String
+  score       Int
+  totalQ      Int        @default(40)
+  durationMs  Int?
+  completedAt DateTime   @default(now())
+  items       ExamItem[]
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, completedAt])
+}
+
+model ExamItem {
+  id           String     @id @default(uuid())
+  examResultId String
+  questionId   String
+  position     Int
+  isCorrect    Boolean
+  examResult   ExamResult @relation(fields: [examResultId], references: [id], onDelete: Cascade)
+  question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
 model WeaknessScore {
   userId    String
   key       String
+  keyType   String   @default("trapFamily")
   score     Float    @default(0)
   updatedAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -129,18 +158,19 @@ model ReadinessSnapshot {
   signals    Json
   computedAt DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, computedAt])
 }
 
 model StudyBlock {
-  id              String     @id @default(uuid())
+  id              String       @id @default(uuid())
   userId          String
   blockNumber     Int
-  startedAt       DateTime   @default(now())
+  startedAt       DateTime     @default(now())
   endedAt         DateTime?
-  seriesCompleted Int        @default(0)
+  seriesCompleted Int          @default(0)
   averageScore    Float?
-  status          String     @default("active")
-  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String       @default("active")
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   series          Series[]
   pauses          BlockPause[]
 }
