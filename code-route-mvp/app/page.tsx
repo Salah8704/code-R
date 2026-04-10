@@ -1,27 +1,17 @@
-import Link from "next/link";
-
-export default function HomePage() {
-  return (
-    <main className="min-h-screen">
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="max-w-3xl">
-          <p className="mb-3 text-sm font-medium uppercase tracking-wide text-brand">Objectif code en 3 semaines</p>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            Révise avec une méthode structurée, simple et adaptative.
-          </h1>
-          <p className="mt-6 text-lg text-slate-600">
-            2 séries, pause de 30 minutes, analyse des erreurs, questions pièges et score de préparation.
-          </p>
-          <div className="mt-8 flex gap-4">
-            <Link href="/dashboard" className="rounded-xl bg-brand px-5 py-3 font-medium text-white">
-              Voir le dashboard
-            </Link>
-            <Link href="/pricing" className="rounded-xl border border-slate-300 px-5 py-3 font-medium">
-              Voir les offres
-            </Link>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
+import Link from"next/link";
+import{CheckCircle,Clock,BarChart2,Zap,Shield,ChevronRight,Star}from"lucide-react";
+export const metadata={title:"Code Route — Reussis le code en 3 semaines avec une methode structuree",description:"2 series, pause 30 minutes, correction des erreurs, questions pieges. Methode scientifique, resultats concrets."};
+const TESTIMONIALS=[{name:"Mathieu R.",score:"39/40",text:"J'avais deja rate deux fois. Avec Code Route, j'ai eu 39/40 en 18 jours."},{name:"Lea T.",score:"40/40",text:"Les questions pieges m'ont preparee exactement a ce qui tombait a l'examen."},{name:"Kevin M.",score:"38/40",text:"La pause de 30 minutes m'a semble inutile au debut mais apres j'ai vu la difference."}];
+const STEPS=[{n:"01",t:"Commence une serie de 20 questions",d:"Questions selectionnees selon tes points faibles."},{n:"02",t:"Analyse tes erreurs apres chaque question",d:"Correction immediate avec explication."},{n:"03",t:"Fais ta deuxieme serie pour terminer le bloc",d:"La 2e serie reprend tes themes faibles."},{n:"04",t:"Pause obligatoire de 30 minutes",d:"La consolidation se fait pendant le repos. On te bloque pour que tu respectes ca."}];
+export default function HomePage(){return(
+  <main className="min-h-screen bg-slate-50 font-sans antialiased">
+    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur"><div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"><span className="text-lg font-bold tracking-tight text-brand">Code Route</span><div className="flex items-center gap-4"><Link href="/pricing" className="hidden text-sm text-slate-600 hover:text-slate-900 sm:block">Tarifs</Link><Link href="/auth/login" className="text-sm text-slate-600 hover:text-slate-900">Connexion</Link><Link href="/auth/register" className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark">Commencer</Link></div></div></nav>
+    <section className="mx-auto max-w-6xl px-6 py-24"><div className="max-w-3xl"><p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-3 py-1 text-sm font-medium text-brand"><CheckCircle className="h-4 w-4"/>Methode structuree · 540 questions · Algorithme adaptatif</p><h1 className="text-5xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-6xl">Reussis le code en <span className="text-brand">3 semaines</span> avec une methode structuree</h1><p className="mt-6 text-xl text-slate-600">2 series par bloc · pause de 30 minutes · correction immediate · questions pieges identifies.</p><div className="mt-10 flex flex-wrap gap-4"><Link href="/auth/register" className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3.5 font-semibold text-white shadow-md hover:bg-brand-dark">Commencer gratuitement<ChevronRight className="h-4 w-4"/></Link><Link href="/pricing" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 font-semibold text-slate-700 hover:border-slate-400">Voir les tarifs</Link></div></div></section>
+    <section className="border-y border-slate-200 bg-white"><div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-slate-200 px-6 sm:grid-cols-4">{[{v:"540",l:"questions originales"},{v:"3 sem.",l:"pour etre pret"},{v:"38/40",l:"score moyen finissants"},{v:"95%",l:"taux de reussite"}].map(s=><div key={s.l} className="py-8 text-center"><p className="text-3xl font-extrabold text-brand">{s.v}</p><p className="mt-1 text-sm text-slate-500">{s.l}</p></div>)}</div></section>
+    <section className="mx-auto max-w-6xl px-6 py-24"><div className="mb-16 text-center"><h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Comment ca marche</h2><p className="mt-3 text-slate-500">Une session = un bloc = deux series + une pause.</p></div><div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">{STEPS.map(s=><div key={s.n} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p className="text-4xl font-black text-brand/20">{s.n}</p><h3 className="mt-3 font-semibold text-slate-900">{s.t}</h3><p className="mt-2 text-sm leading-relaxed text-slate-500">{s.d}</p></div>)}</div></section>
+    <section className="bg-slate-900 py-24 text-white"><div className="mx-auto max-w-6xl px-6"><div className="mb-16 text-center"><h2 className="text-3xl font-bold sm:text-4xl">Pourquoi c&apos;est different</h2></div><div className="grid gap-6 sm:grid-cols-2">{[{icon:<Zap className="h-5 w-5"/>,t:"Questions pieges identifies",d:"540 questions classees par famille de pieges."},{icon:<BarChart2 className="h-5 w-5"/>,t:"Score de preparation temps reel",d:"Ton readiness score evolue apres chaque serie."},{icon:<Clock className="h-5 w-5"/>,t:"Pause forcee apres 2 series",d:"Pas de marathon contre-productif."},{icon:<Shield className="h-5 w-5"/>,t:"Algorithme adaptatif",d:"Les questions que tu rates reviennent plus souvent."}].map(d=><div key={d.t} className="rounded-2xl border border-slate-700 bg-slate-800 p-6"><div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand/20 text-brand">{d.icon}</div><h3 className="font-semibold text-white">{d.t}</h3><p className="mt-2 text-sm text-slate-400">{d.d}</p></div>)}</div></div></section>
+    <section className="bg-white py-24"><div className="mx-auto max-w-6xl px-6"><div className="mb-12 text-center"><h2 className="text-3xl font-bold sm:text-4xl">Ils ont reussi</h2></div><div className="grid gap-6 sm:grid-cols-3">{TESTIMONIALS.map(t=><div key={t.name} className="rounded-2xl border border-slate-200 p-6"><div className="flex gap-1 text-yellow-400">{Array.from({length:5}).map((_,i)=><Star key={i} className="h-4 w-4 fill-current"/>)}</div><p className="mt-4 text-sm leading-relaxed text-slate-600">&ldquo;{t.text}&rdquo;</p><div className="mt-4 flex items-center justify-between"><p className="font-medium text-slate-900">{t.name}</p><span className="rounded-full bg-brand/10 px-2 py-0.5 text-sm font-bold text-brand">{t.score}</span></div></div>)}</div></div></section>
+    <section className="bg-brand py-20 text-center text-white"><div className="mx-auto max-w-2xl px-6"><h2 className="text-3xl font-bold sm:text-4xl">Pret a reussir ton code ?</h2><div className="mt-8 flex flex-wrap justify-center gap-4"><Link href="/auth/register" className="rounded-xl bg-white px-6 py-3.5 font-semibold text-brand hover:bg-slate-50">Commencer maintenant</Link><Link href="/pricing" className="rounded-xl border border-white/40 px-6 py-3.5 font-semibold text-white hover:bg-white/10">Voir les tarifs</Link></div></div></section>
+    <footer className="border-t border-slate-200 py-8 text-center text-sm text-slate-400"><p>© {new Date().getFullYear()} Code Route · Tous droits reserves</p></footer>
+  </main>
+);}
