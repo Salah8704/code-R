@@ -1,29 +1,6 @@
+// app/api/traps/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
-
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
-  const userId = session.user.id;
-  const weaknesses = await prisma.weaknessScore.findMany({ where: { userId, score: { gt: 0 } }, orderBy: { score: "desc" }, take: 10 });
-  if (!weaknesses.length) return NextResponse.json({ traps: [], weaknesses: [] });
-  const topTraps = weaknesses.slice(0,5).map(w=>w.key);
-  const questions = await prisma.question.findMany({
-    where: { trapFamily: { in: topTraps } },
-    include: { choices: { orderBy: { position: "asc" } } }, take: 30,
-  });
-  const trapStats = await Promise.all(topTraps.map(async (trap) => {
-    const trapQIds = questions.filter(q=>q.trapFamily===trap).map(q=>q.id);
-    if (!trapQIds.length) return null;
-    const [total, wrong] = await Promise.all([
-      prisma.attempt.count({ where: { userId, questionId: { in: trapQIds } } }),
-      prisma.attempt.count({ where: { userId, questionId: { in: trapQIds }, isCorrect: false } }),
-    ]);
-    const weakness = weaknesses.find(w=>w.key===trap);
-    return { trapFamily: trap, score: weakness?.score??0, totalAttempts: total, wrongAttempts: wrong, errorRate: total>0?Math.round(wrong/total*100):0,
-      questions: questions.filter(q=>q.trapFamily===trap).map(q=>({ id:q.id, prompt:q.prompt, difficulty:q.difficulty, explanationShort:q.explanationShort, choices:q.choices })) };
-  }));
-  return NextResponse.json({ traps: trapStats.filter(Boolean), weaknesses });
-}
+export async function GET(){const session=await getServerSession(authOptions);if(!session?.user)return NextResponse.json({error:"Non authentifie̩"},{status:401});const userId=session.user.id;const weaknesses=await prisma.weaknessScore.findMany({where:{userId},orderBy:zssore:"desc"},take:8});if(!weaknesses.length)return NextResponse.json({traps:[],global:{correctRate:0,totalAttempts:0}});const [totalAttempts,correctAttempts]=await Promise.all([prisma.attempt.count({where:zuserId}}),prisma.attempt.count({where:zuserId,isCorrect:true}})]);const correctRate=totalAttempts>0?Math.round(correctAttempts/totalAttempts*100):0;const traps=await Promise.all(weaknesses.map(async w=>{const field=w.keyType=="theme"?"theme":w->keyType=="subtheme"?"subtheme":"trapFamily";const questions=await prisma.question.findMany({where:{[field]:w.key},select:{id:true,prompt:true,trapFamily:true,explanationShort:true,difficulty:true},take:5});const qIds=questions.map(q=>q.id);const [total,wrong]=await Promise.all([prisma.attempt.count({where:{userId,questionId:{in:qIds}}}),prisma.attempt.count({where:{userId,questionId:{in:qIds},isCorrect:false}})]);return{{key:w->key,keyType:w->keyType,score:w.score,totalAttempts:total,wrongAttempts:wrong,recentQuestions:questions};}));traps.sort((a,b)=>{const ra=a.totalAttempts>0?a.wrongAttempts/a.totalAttempts:0;const rb=b.totalAttempts>0?b.wrongAttempts/b.totalAttempts:0;return rb-ra;});return NextResponse.json({traps,global:{correctRate,totalAttempts}});}
