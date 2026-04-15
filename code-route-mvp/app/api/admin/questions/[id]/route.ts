@@ -8,9 +8,7 @@ export async function DELETE(
 ) {
   const authError = await requireAdmin();
   if (authError) return authError;
-
   const { id } = await params;
-
   await prisma.question.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
@@ -21,13 +19,8 @@ export async function PATCH(
 ) {
   const authError = await requireAdmin();
   if (authError) return authError;
-
   const { id } = await params;
   const body = await request.json();
-
-  const question = await prisma.question.update({
-    where: { id },
-    data: body,
-  });
+  const question = await prisma.question.update({ where: { id }, data: body });
   return NextResponse.json(question);
 }
