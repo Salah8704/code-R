@@ -11,7 +11,6 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
-
   if (!signature) {
     return NextResponse.json({ error: "Signature manquante" }, { status: 400 });
   }
@@ -28,46 +27,55 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
-      const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
+      const customerId = typeof session.customer === "string" ? session.customer : null;
       const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
-
       if (!userId || !customerId) break;
 
-      await prisma.subscription.upsert({
+      const existing = await prisma.subscription.findFirst({
         where: { stripeCustomerId: customerId },
-        create: {
-          userId,
-          stripeCustomerId: customerId,
-          stripeSubscriptionId: subscriptionId,
-          stripePriceId: session.metadata?.priceId ?? null,
-          status: "active",
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        },
-        update: {
-          stripeSubscriptionId: subscriptionId,
-          status: "active",
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        },
       });
+      if (existing) {
+        await prisma.subscription.update({
+          where: { id: existing.id },
+          data: {
+            stripeSubscriptionId: subscriptionId,
+            status: "active",
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+        });
+      } else {
+        await prisma.subscription.create({
+          data: {
+            userId,
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscriptionId,
+            stripePriceId: session.metadata?.priceId ?? null,
+            status: "active",
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+        });
+      }
       break;
     }
 
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = typeof subscription.customer === "string"
-        ? subscription.customer
-        : subscription.customer.id;
-
-      const status = event.type === "customer.subscription.deleted" ? "canceled" : subscription.status;
-      const currentPeriodEnd = subscription.current_period_end
-        ? new Date(subscription.current_period_end * 1000)
+      const sub = event.data.object as Stripe.Subscription;
+      const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+      const status = event.type === "customer.subscription.deleted" ? "canceled" : sub.status;
+      const currentPeriodEnd = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000)
         : null;
 
-      await prisma.subscription.updateMany({
+      const existing = await prisma.subscription.findFirst({
         where: { stripeCustomerId: customerId },
-        data: { status, currentPeriodEnd },
       });
+      if (existing) {
+        await prisma.subscription.update({
+          where: { id: existing.id },
+          data: { status, currentPeriodEnd },
+        });
+      }
       break;
     }
 
