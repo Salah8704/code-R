@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 type RawQuestion = { id: string; theme: string; subtheme: string; trap_family: string; difficulty: number; type?: string; prompt: string; choices: { id: string; text: string; is_correct: boolean }[]; explanation_short: string; explanation_long?: string; has_image?: boolean; };
