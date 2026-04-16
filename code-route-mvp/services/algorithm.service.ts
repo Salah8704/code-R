@@ -35,7 +35,7 @@ async function upsertWeaknessScore(userId: string, key: string, keyType: string,
   });
 }
 
-export async function finalizesSeries(seriesId: string): Promise<{ score: number; avgResponseTimeMs: number; dominantTraps: string[]; blockComplete: boolean; pauseCreated: boolean }> {
+export async function finalizeSeries(seriesId: string): Promise<{ score: number; avgResponseTimeMs: number; dominantTraps: string[]; blockComplete: boolean; pauseCreated: boolean }> {
   const series = await prisma.series.findUniqueOrThrow({ where: { id: seriesId }, include: { items: { include: { question: true } } } });
   const attempts = await prisma.attempt.findMany({ where: { userId: series.userId, questionId: { in: series.items.map((i) => i.questionId) }, createdAt: { gte: series.startedAt } }, orderBy: { createdAt: "asc" } });
   const correct = attempts.filter((a) => a.isCorrect).length;
