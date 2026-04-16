@@ -1,13 +1,13 @@
 // app/api/dashboard/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { computeReadiness, shouldForcePause } from "@/services/algorithm.service";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: "Non authentifiÃ©" }, { status: 401 });
   const userId = session.user.id;
 
   const pauseStatus = await shouldForcePause(userId);
@@ -33,8 +33,8 @@ export async function GET() {
     : 0;
 
   let state = "IDLE";
-  let nextAction = { label: "Commencer ma première série", href: "/quiz", locked: false };
-  let coachMessage = "Bienvenue ! Commençons par évaluer ton niveau.";
+  let nextAction = { label: "Commencer ma premiÃ¨re sÃ©rie", href: "/quiz", locked: false };
+  let coachMessage = "Bienvenue ! CommenÃ§ons par Ã©valuer ton niveau.";
 
   if (pauseStatus.forced) {
     state = "PAUSE";
@@ -43,16 +43,16 @@ export async function GET() {
   } else if (readiness.score >= 85) {
     state = "EXAM_READY";
     nextAction = { label: "Faire un examen blanc", href: "/exam", locked: false };
-    coachMessage = "Tu es prêt à passer l'examen ! Fais un dernier examen blanc.";
+    coachMessage = "Tu es prÃªt Ã  passer l'examen ! Fais un dernier examen blanc.";
   } else if (activeBlock && activeBlock.seriesCompleted < 2) {
     state = "IN_BLOCK";
     const serieNum = activeBlock.seriesCompleted + 1;
-    nextAction = { label: `Faire la série ${serieNum}/2`, href: "/quiz", locked: false };
-    coachMessage = `Tu es en plein bloc ${activeBlock.blockNumber}. Encore une série pour le terminer.`;
+    nextAction = { label: `Faire la sÃ©rie ${serieNum}/2`, href: "/quiz", locked: false };
+    coachMessage = `Tu es en plein bloc ${activeBlock.blockNumber}. Encore une sÃ©rie pour le terminer.`;
   } else if (totalSeries > 0) {
     state = "BLOCK_DONE";
-    nextAction = { label: "Démarrer un nouveau bloc", href: "/quiz", locked: false };
-    coachMessage = "Excellent ! Tu as terminé ce bloc. Prêt pour le suivant ?";
+    nextAction = { label: "DÃ©marrer un nouveau bloc", href: "/quiz", locked: false };
+    coachMessage = "Excellent ! Tu as terminÃ© ce bloc. PrÃªt pour le suivant ?";
   }
 
   return NextResponse.json({
