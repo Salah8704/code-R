@@ -6,7 +6,9 @@ import { prisma } from "@/lib/prisma";
 type RawQuestion = { id: string; theme: string; subtheme: string; trap_family: string; difficulty: number; type?: string; prompt: string; choices: { id: string; text: string; is_correct: boolean }[]; explanation_short: string; explanation_long?: string; has_image?: boolean; };
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as {
+  user?: { role?: string; id?: string };
+};
   if (!session?.user || session.user.role !== "admin") return NextResponse.json({ error: "Acces refuse" }, { status: 403 });
   let data: { questions: RawQuestion[] };
   try { data = await req.json(); if (!Array.isArray(data.questions)) throw new Error(); } catch { return NextResponse.json({ error: "JSON invalide" }, { status: 400 }); }
